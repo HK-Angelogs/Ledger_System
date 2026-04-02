@@ -28,7 +28,6 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -40,11 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'ledger.apps.LedgerConfig',
     'django_extensions',   # if you still use it
-    'auditlog',            # ← add this line 
+    'auditlog',            # ← add this line
+    'Users',
 
-    
 ]
-
 
 
 MIDDLEWARE = [
@@ -92,6 +90,7 @@ DATABASES = {
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
+AUTH_USER_MODEL = 'Users.User'
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -125,3 +124,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Development static directory (the one you already have)
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+STATIC_ROOT = BASE_DIR / "staticfiles"
