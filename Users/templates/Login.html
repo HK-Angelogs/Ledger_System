@@ -57,19 +57,28 @@
             <p class="text-center fw-bold mx-3 mb-0">Or</p>
           </div>
 
-          <!-- Email input -->
-          <div data-mdb-input-init class="form-outline mb-4">
-            <input type="email" id="form3Example3" class="form-control form-control-lg"
-              placeholder="Enter a valid email address" />
-            <label class="form-label" for="form3Example3">Email address</label>
-          </div>
+          <!-- Username input -->
+        <form method="POST">
+        {% csrf_token %} <div class="form-outline mb-4">
+            <input type="text" name="username" id="form3Example3" class="form-control form-control-lg"
+            placeholder="Enter username" required />
+            <label class="form-label" for="form3Example3">Username</label>
+        </div>
 
           <!-- Password input -->
-          <div data-mdb-input-init class="form-outline mb-3">
-            <input type="password" id="form3Example4" class="form-control form-control-lg"
-              placeholder="Enter password" />
+        <div class="form-outline mb-3">
+            <input type="password" name="password" id="form3Example4" class="form-control form-control-lg"
+            placeholder="Enter password" required />
             <label class="form-label" for="form3Example4">Password</label>
-          </div>
+        </div>
+
+          <!-- Login Button -->        
+            <div class="text-center text-lg-start mt-4 pt-2">
+        <button type="submit" class="btn btn-primary btn-lg"
+        style="padding-left: 2.5rem; padding-right: 2.5rem;">Login</button>
+        
+        </div>
+        </form>
 
           <div class="d-flex justify-content-between align-items-center">
             <!-- Checkbox -->

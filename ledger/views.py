@@ -22,11 +22,6 @@ from .forms import (
 )
 
 
-def Login(request):
-    """Login page"""
-    return render(request, 'ledger/Login.html')
-
-
 @login_required
 # ==================== DASHBOARD ====================
 def dashboard(request):
