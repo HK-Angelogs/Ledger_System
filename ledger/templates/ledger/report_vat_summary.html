@@ -1,0 +1,180 @@
+{% extends 'ledger/base.html' %}
+
+{% block title %}VAT Summary Report{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="display-6"><i class="bi bi-receipt"></i> VAT Summary Report</h1>
+            <h5 class="text-muted">BIR Form 2550Q - Quarterly VAT Return</h5>
+            <p class="text-muted mb-0">
+                {% if date_from and date_to %}
+                    Period: {{ date_from|date:"M d, Y" }} to {{ date_to|date:"M d, Y" }}
+                {% elif date_from %}
+                    From: {{ date_from|date:"M d, Y" }}
+                {% elif date_to %}
+                    Through: {{ date_to|date:"M d, Y" }}
+                {% else %}
+                    All Transactions
+                {% endif %}
+            </p>
+        </div>
+        <div>
+            <button onclick="window.print()" class="btn btn-primary">
+                <i class="bi bi-printer"></i> Print
+            </button>
+            <a href="/taxes/" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Tax Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Date Filter -->
+    <div class="card shadow mb-4 no-print">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">Quarter</label>
+                    {{ filter_form.quarter }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">Year</label>
+                    {{ filter_form.year }}
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">From Date</label>
+                    {{ filter_form.date_from }}
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">To Date</label>
+                    {{ filter_form.date_to }}
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100" style="margin-top: 28px;">
+                        <i class="bi bi-funnel"></i> Apply
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- VAT Summary Report -->
+    <div class="card shadow">
+        <div class="card-body p-4">
+            <!-- PART I: Sales/Receipts -->
+            <h5 class="fw-bold text-primary mb-3">PART I: SALES/RECEIPTS</h5>
+            <table class="table table-borderless">
+                <tbody>
+                    <tr>
+                        <td style="width: 70%;" class="ps-4">
+                            Gross Sales/Receipts (VATable)
+                        </td>
+                        <td class="text-end fw-bold" style="width: 30%;">
+                            ₱{{ gross_sales|floatformat:2 }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="ps-4">Zero-Rated Sales</td>
+                        <td class="text-end">₱{{ zero_rated_sales|floatformat:2 }}</td>
+                    </tr>
+                    <tr>
+                        <td class="ps-4">VAT-Exempt Sales</td>
+                        <td class="text-end">₱{{ vat_exempt_sales|floatformat:2 }}</td>
+                    </tr>
+                </tbody>
+                <tfoot class="border-top border-2 border-dark">
+                    <tr class="fw-bold">
+                        <td>OUTPUT VAT (12% of Gross Sales)</td>
+                        <td class="text-end text-success">₱{{ output_vat|floatformat:2 }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <hr class="my-4">
+
+            <!-- PART II: Purchases -->
+            <h5 class="fw-bold text-primary mb-3">PART II: PURCHASES/IMPORTATIONS</h5>
+            <table class="table table-borderless">
+                <tbody>
+                    <tr>
+                        <td style="width: 70%;" class="ps-4">
+                            VATable Purchases (Net of VAT)
+                        </td>
+                        <td class="text-end fw-bold" style="width: 30%;">
+                            ₱{{ vat_purchases|floatformat:2 }}
+                        </td>
+                    </tr>
+                </tbody>
+                <tfoot class="border-top border-2 border-dark">
+                    <tr class="fw-bold">
+                        <td>INPUT VAT (12% of Purchases)</td>
+                        <td class="text-end text-info">₱{{ input_vat|floatformat:2 }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <hr class="my-4">
+
+            <!-- PART III: VAT Payable/Excess -->
+            <h5 class="fw-bold text-primary mb-3">PART III: COMPUTATION OF VAT PAYABLE/(EXCESS)</h5>
+            <table class="table table-borderless">
+                <tbody>
+                    <tr>
+                        <td style="width: 70%;" class="ps-4">Output VAT</td>
+                        <td class="text-end" style="width: 30%;">₱{{ output_vat|floatformat:2 }}</td>
+                    </tr>
+                    <tr>
+                        <td class="ps-4">Less: Input VAT</td>
+                        <td class="text-end">(₱{{ input_vat|floatformat:2 }})</td>
+                    </tr>
+                </tbody>
+                <tfoot class="border-top border-3 border-dark">
+                    <tr class="fw-bold" style="font-size: 1.2rem;">
+                        <td>
+                            {% if vat_payable >= 0 %}
+                                VAT PAYABLE
+                            {% else %}
+                                VAT EXCESS/(OVERPAYMENT)
+                            {% endif %}
+                        </td>
+                        <td class="text-end {% if vat_payable >= 0 %}text-danger{% else %}text-success{% endif %}">
+                            {% if vat_payable >= 0 %}
+                                ₱{{ vat_payable|floatformat:2 }}
+                            {% else %}
+                                (₱{{ vat_payable|floatformat:2|slice:"1:" }})
+                            {% endif %}
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <!-- Filing Instructions -->
+            <div class="alert alert-info mt-4">
+                <h6 class="alert-heading"><i class="bi bi-info-circle"></i> Filing Reminders:</h6>
+                <ul class="mb-0">
+                    <li>File BIR Form 2550Q on or before the 25th day after the close of each taxable quarter</li>
+                    <li>Pay VAT due at any Authorized Agent Bank (AAB)</li>
+                    <li>If excess VAT, you may carry over or apply for refund</li>
+                    <li>Attach supporting documents: Official Receipts, Sales Invoices, Purchase Invoices</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-3 text-muted no-print">
+        <small>Generated on {{ "now"|date:"M d, Y g:i A" }}</small>
+    </div>
+</div>
+
+<style>
+@media print {
+    .no-print { display: none !important; }
+    .navbar { display: none !important; }
+    body { padding: 0; margin: 20px; }
+    .card { border: none; box-shadow: none !important; }
+    h1 { font-size: 20px; }
+    h5 { font-size: 14px; }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,173 @@
+{% extends 'ledger/base.html' %}
+
+{% block title %}Journal {{ journal.journal_number }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="display-6">
+                <i class="bi bi-journal-text"></i> Journal Entry: {{ journal.journal_number }}
+            </h1>
+            <p class="text-muted mb-0">{{ journal.transaction_date|date:"F d, Y" }}</p>
+        </div>
+        <div>
+            {% if journal.status == 'DRAFT' %}
+                <a href="/journals/{{ journal.pk }}/edit/" class="btn btn-primary">
+                    <i class="bi bi-pencil"></i> Edit
+                </a>
+                <a href="/journals/{{ journal.pk }}/post/" class="btn btn-success">
+                    <i class="bi bi-check-circle"></i> Post Journal
+                </a>
+            {% elif journal.status == 'POSTED' %}
+                <a href="/journals/{{ journal.pk }}/void/" class="btn btn-warning">
+                    <i class="bi bi-x-circle"></i> Void Journal
+                </a>
+            {% endif %}
+            <a href="/journals/" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Journal Header Info -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-info-circle"></i> Journal Information</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <p class="mb-2"><strong>Journal Number:</strong></p>
+                    <p class="text-muted">{{ journal.journal_number }}</p>
+                </div>
+                <div class="col-md-3">
+                    <p class="mb-2"><strong>Transaction Date:</strong></p>
+                    <p class="text-muted">{{ journal.transaction_date|date:"F d, Y" }}</p>
+                </div>
+                <div class="col-md-3">
+                    <p class="mb-2"><strong>Reference:</strong></p>
+                    <p class="text-muted">{{ journal.reference|default:"—" }}</p>
+                </div>
+                <div class="col-md-3">
+                    <p class="mb-2"><strong>Status:</strong></p>
+                    <p>
+                        {% if journal.status == 'DRAFT' %}
+                            <span class="badge bg-warning text-dark">Draft</span>
+                        {% elif journal.status == 'POSTED' %}
+                            <span class="badge bg-success">Posted</span>
+                        {% elif journal.status == 'VOID' %}
+                            <span class="badge bg-secondary">Void</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12">
+                    <p class="mb-2"><strong>Description:</strong></p>
+                    <p class="text-muted">{{ journal.description }}</p>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    <p class="mb-1"><small><strong>Created By:</strong> {{ journal.created_by|default:"System" }}</small></p>
+                    <p class="mb-1"><small><strong>Created At:</strong> {{ journal.created_at|date:"M d, Y g:i A" }}</small></p>
+                </div>
+                <div class="col-md-6">
+                    {% if journal.posted_at %}
+                        <p class="mb-1"><small><strong>Posted At:</strong> {{ journal.posted_at|date:"M d, Y g:i A" }}</small></p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Journal Lines -->
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-list-ul"></i> Journal Lines</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 50px;">Line</th>
+                            <th>Account</th>
+                            <th>Description</th>
+                            <th class="text-end">Debit</th>
+                            <th class="text-end">Credit</th>
+                            <th>Tax Type</th>
+                            <th class="text-end">Tax Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for line in lines %}
+                            <tr>
+                                <td>{{ line.line_number }}</td>
+                                <td>
+                                    <strong>{{ line.account.code }}</strong><br>
+                                    <small class="text-muted">{{ line.account.name }}</small>
+                                </td>
+                                <td><small>{{ line.description|default:"—" }}</small></td>
+                                <td class="text-end">
+                                    {% if line.debit_amount > 0 %}
+                                        <strong>₱{{ line.debit_amount|floatformat:2 }}</strong>
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    {% if line.credit_amount > 0 %}
+                                        <strong>₱{{ line.credit_amount|floatformat:2 }}</strong>
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if line.tax_type %}
+                                        <span class="badge bg-info">{{ line.tax_type.code }}</span>
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    {% if line.tax_amount > 0 %}
+                                        ₱{{ line.tax_amount|floatformat:2 }}
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="table-secondary">
+                        <tr class="fw-bold">
+                            <td colspan="3" class="text-end">TOTALS:</td>
+                            <td class="text-end">₱{{ journal.total_debits|floatformat:2 }}</td>
+                            <td class="text-end">₱{{ journal.total_credits|floatformat:2 }}</td>
+                            <td colspan="2" class="text-center">
+                                {% if journal.is_balanced %}
+                                    <span class="badge bg-success">✓ Balanced</span>
+                                {% else %}
+                                    <span class="badge bg-danger">⚠ Not Balanced</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends 'ledger/base.html' %}
+
+{% block title %}Delete Account{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-exclamation-triangle"></i> Confirm Delete
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p class="lead">Are you sure you want to deactivate this account?</p>
+                    
+                    <div class="alert alert-warning">
+                        <strong>Account Details:</strong><br>
+                        <strong>Code:</strong> {{ account.code }}<br>
+                        <strong>Name:</strong> {{ account.name }}<br>
+                        <strong>Type:</strong> {{ account.get_account_type_display }}
+                    </div>
+                    
+                    <p class="text-muted">
+                        <i class="bi bi-info-circle"></i> 
+                        This will mark the account as inactive. It will not be deleted permanently and can be reactivated later.
+                    </p>
+                    
+                    <form method="post" class="d-flex justify-content-between">
+                        {% csrf_token %}
+                        <a href="/accounts/" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> Yes, Deactivate
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

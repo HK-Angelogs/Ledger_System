@@ -1,0 +1,169 @@
+{% extends 'ledger/base.html' %}
+
+{% block title %}Tax Reports{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="display-5"><i class="bi bi-calculator-fill"></i> Tax Reports Dashboard</h1>
+            <p class="text-muted">BIR Compliance & Tax Filing Reports</p>
+        </div>
+        <div>
+            <a href="/reports/trial-balance/" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left"></i> Back to Financial Reports
+            </a>
+        </div>
+    </div>
+
+    <!-- Tax Reports Grid -->
+    <div class="row g-4">
+        <!-- VAT Summary -->
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-receipt"></i> VAT Summary Report
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        Quarterly VAT return (BIR Form 2550Q) - Output VAT, Input VAT, and VAT Payable calculations.
+                    </p>
+                    <ul class="list-unstyled mb-3">
+                        <li><i class="bi bi-check-circle text-success"></i> Gross VATable Sales</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Output VAT Computation</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Input VAT Tracking</li>
+                        <li><i class="bi bi-check-circle text-success"></i> VAT Payable Summary</li>
+                    </ul>
+                    <a href="/taxes/vat-summary/" class="btn btn-primary w-100">
+                        <i class="bi bi-arrow-right-circle"></i> View VAT Report
+                    </a>
+                </div>
+                <div class="card-footer text-muted">
+                    <small><i class="bi bi-calendar3"></i> Due: 25th day after quarter end</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Income Tax Summary -->
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-cash-coin"></i> Income Tax Summary
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        Annual income tax return (BIR Form 1702) - Revenue, expenses, and taxable income computation.
+                    </p>
+                    <ul class="list-unstyled mb-3">
+                        <li><i class="bi bi-check-circle text-success"></i> Business Revenue Summary</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Deductible Expenses</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Taxable Income</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Tax Due Calculation</li>
+                    </ul>
+                    <a href="/taxes/income-tax/" class="btn btn-success w-100">
+                        <i class="bi bi-arrow-right-circle"></i> View Income Tax Report
+                    </a>
+                </div>
+                <div class="card-footer text-muted">
+                    <small><i class="bi bi-calendar3"></i> Due: April 15 (Annual)</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Withholding Tax Report -->
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="bi bi-percent"></i> Withholding Tax Report
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        Expanded withholding tax (EWT) tracking - BIR Form 1604-E for creditable withholding taxes.
+                    </p>
+                    <ul class="list-unstyled mb-3">
+                        <li><i class="bi bi-check-circle text-success"></i> Creditable Withholding Tax (2%, 5%, 10%)</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Final Withholding Tax</li>
+                        <li><i class="bi bi-check-circle text-success"></i> By Transaction Type</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Monthly Summary</li>
+                    </ul>
+                    <a href="/taxes/withholding/" class="btn btn-warning w-100">
+                        <i class="bi bi-arrow-right-circle"></i> View Withholding Report
+                    </a>
+                </div>
+                <div class="card-footer text-muted">
+                    <small><i class="bi bi-calendar3"></i> Due: 10th day of following month</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tax Liabilities Tracker -->
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-exclamation-triangle"></i> Tax Liabilities Tracker
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        Monitor unpaid tax liabilities - VAT payable, withholding tax payable, and other tax obligations.
+                    </p>
+                    <ul class="list-unstyled mb-3">
+                        <li><i class="bi bi-check-circle text-success"></i> VAT Payable Balance</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Withholding Tax Payable</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Other Tax Liabilities</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Payment Tracking</li>
+                    </ul>
+                    <a href="/taxes/liabilities/" class="btn btn-danger w-100">
+                        <i class="bi bi-arrow-right-circle"></i> View Tax Liabilities
+                    </a>
+                </div>
+                <div class="card-footer text-muted">
+                    <small><i class="bi bi-calendar3"></i> Monitor continuously</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="card shadow mt-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="bi bi-link-45deg"></i> Quick Links & Resources</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <h6><i class="bi bi-journal-text"></i> Related Reports</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="/reports/trial-balance/" class="text-decoration-none">Trial Balance</a></li>
+                        <li><a href="/reports/income-statement/" class="text-decoration-none">Income Statement</a></li>
+                        <li><a href="/reports/balance-sheet/" class="text-decoration-none">Balance Sheet</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h6><i class="bi bi-calendar-check"></i> Filing Deadlines</h6>
+                    <ul class="list-unstyled">
+                        <li><strong>Monthly (1604):</strong> 10th day</li>
+                        <li><strong>Quarterly (2550Q):</strong> 25th day</li>
+                        <li><strong>Annual (1702):</strong> April 15</li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h6><i class="bi bi-globe"></i> BIR Resources</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="https://www.bir.gov.ph" target="_blank" class="text-decoration-none">BIR Official Website</a></li>
+                        <li><a href="https://efps.bir.gov.ph" target="_blank" class="text-decoration-none">eFPS Portal</a></li>
+                        <li><a href="/admin/ledger/taxtype/" class="text-decoration-none">Manage Tax Types</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

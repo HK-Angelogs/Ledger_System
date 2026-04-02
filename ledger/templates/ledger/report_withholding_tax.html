@@ -1,0 +1,227 @@
+{% extends 'ledger/base.html' %}
+
+{% block title %}Withholding Tax Report{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="display-6"><i class="bi bi-percent"></i> Withholding Tax Report</h1>
+            <h5 class="text-muted">BIR Form 1604-E - Monthly Remittance Return of Creditable Income Taxes Withheld</h5>
+            <p class="text-muted mb-0">
+                {% if date_from and date_to %}
+                    Period: {{ date_from|date:"M d, Y" }} to {{ date_to|date:"M d, Y" }}
+                {% elif date_from %}
+                    From: {{ date_from|date:"M d, Y" }}
+                {% elif date_to %}
+                    Through: {{ date_to|date:"M d, Y" }}
+                {% else %}
+                    All Transactions
+                {% endif %}
+            </p>
+        </div>
+        <div>
+            <button onclick="window.print()" class="btn btn-primary">
+                <i class="bi bi-printer"></i> Print
+            </button>
+            <a href="/taxes/" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Tax Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Date Filter -->
+    <div class="card shadow mb-4 no-print">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">Year</label>
+                    {{ filter_form.year }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">From Date</label>
+                    {{ filter_form.date_from }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">To Date</label>
+                    {{ filter_form.date_to }}
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100" style="margin-top: 28px;">
+                        <i class="bi bi-funnel"></i> Apply
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Withholding Tax Summary -->
+    <div class="card shadow">
+        <div class="card-body p-4">
+            <!-- Expanded Withholding Tax (EWT) Section -->
+            <h5 class="fw-bold text-primary mb-3">
+                <i class="bi bi-receipt-cutoff"></i> EXPANDED WITHHOLDING TAX (EWT)
+            </h5>
+            <p class="text-muted">Creditable withholding taxes on compensation, professional fees, and other income payments</p>
+            
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 15%;">ATC Code</th>
+                        <th style="width: 40%;">Nature of Income Payment</th>
+                        <th class="text-center" style="width: 15%;">Tax Rate</th>
+                        <th class="text-end" style="width: 15%;">Base Amount</th>
+                        <th class="text-end" style="width: 15%;">Tax Withheld</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>WI010</td>
+                        <td>Professional fees (lawyers, CPAs, engineers, etc.)</td>
+                        <td class="text-center">10%</td>
+                        <td class="text-end">₱0.00</td>
+                        <td class="text-end">₱0.00</td>
+                    </tr>
+                    <tr>
+                        <td>WI020</td>
+                        <td>Professional fees (individuals)</td>
+                        <td class="text-center">5%</td>
+                        <td class="text-end">₱0.00</td>
+                        <td class="text-end">₱0.00</td>
+                    </tr>
+                    <tr>
+                        <td>WI150</td>
+                        <td>Income payments to contractors (general)</td>
+                        <td class="text-center">2%</td>
+                        <td class="text-end">₱0.00</td>
+                        <td class="text-end">₱0.00</td>
+                    </tr>
+                    <tr>
+                        <td>WI157</td>
+                        <td>Income payments for purchases of goods/services</td>
+                        <td class="text-center">1%</td>
+                        <td class="text-end">₱0.00</td>
+                        <td class="text-end">₱0.00</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" class="text-muted text-center">
+                            <small><i class="bi bi-info-circle"></i> No withholding tax transactions recorded for this period</small>
+                        </td>
+                    </tr>
+                </tbody>
+                <tfoot class="table-secondary">
+                    <tr class="fw-bold">
+                        <td colspan="4" class="text-end">TOTAL EXPANDED WITHHOLDING TAX:</td>
+                        <td class="text-end text-warning">₱{{ ewt_total|floatformat:2 }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <hr class="my-4">
+
+            <!-- Final Withholding Tax Section -->
+            <h5 class="fw-bold text-primary mb-3">
+                <i class="bi bi-cash-stack"></i> FINAL WITHHOLDING TAX
+            </h5>
+            <p class="text-muted">Final taxes withheld on certain passive income (interest, dividends, royalties)</p>
+            
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 15%;">ATC Code</th>
+                        <th style="width: 40%;">Nature of Income Payment</th>
+                        <th class="text-center" style="width: 15%;">Tax Rate</th>
+                        <th class="text-end" style="width: 15%;">Base Amount</th>
+                        <th class="text-end" style="width: 15%;">Tax Withheld</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>WI610</td>
+                        <td>Interest income from bank deposits</td>
+                        <td class="text-center">20%</td>
+                        <td class="text-end">₱0.00</td>
+                        <td class="text-end">₱0.00</td>
+                    </tr>
+                    <tr>
+                        <td>WI630</td>
+                        <td>Dividends from domestic corporations</td>
+                        <td class="text-center">10%</td>
+                        <td class="text-end">₱0.00</td>
+                        <td class="text-end">₱0.00</td>
+                    </tr>
+                    <tr>
+                        <td>WI710</td>
+                        <td>Royalties (books, literary works, musical compositions)</td>
+                        <td class="text-center">10%</td>
+                        <td class="text-end">₱0.00</td>
+                        <td class="text-end">₱0.00</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" class="text-muted text-center">
+                            <small><i class="bi bi-info-circle"></i> No final withholding tax transactions recorded for this period</small>
+                        </td>
+                    </tr>
+                </tbody>
+                <tfoot class="table-secondary">
+                    <tr class="fw-bold">
+                        <td colspan="4" class="text-end">TOTAL FINAL WITHHOLDING TAX:</td>
+                        <td class="text-end text-info">₱{{ final_wht_total|floatformat:2 }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <hr class="my-4">
+
+            <!-- Grand Total -->
+            <table class="table table-borderless">
+                <tfoot class="border-top border-3 border-dark">
+                    <tr class="fw-bold" style="font-size: 1.2rem;">
+                        <td style="width: 70%;">TOTAL WITHHOLDING TAX REMITTABLE</td>
+                        <td class="text-end text-danger" style="width: 30%;">
+                            ₱{{ ewt_total|add:final_wht_total|floatformat:2 }}
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <!-- Filing Instructions -->
+            <div class="alert alert-info mt-4">
+                <h6 class="alert-heading"><i class="bi bi-info-circle"></i> Filing Reminders:</h6>
+                <ul class="mb-0">
+                    <li><strong>Monthly Filing:</strong> BIR Form 1604-E must be filed on or before the 10th day of the following month</li>
+                    <li><strong>Payment:</strong> Remit withholding tax to AAB together with the return</li>
+                    <li><strong>Quarterly Alphalist:</strong> Submit BIR Form 1604-E with alphalist of payees every quarter</li>
+                    <li><strong>Annual Information Return:</strong> File BIR Form 1604-CF (Annual Information Return) by January 31</li>
+                    <li><strong>Certificates:</strong> Issue BIR Form 2307 (Certificate of Creditable Tax Withheld at Source) to payees</li>
+                </ul>
+            </div>
+
+            <div class="alert alert-warning mt-3">
+                <h6 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> Important Notes:</h6>
+                <ul class="mb-0">
+                    <li>Penalties for late filing: 25% surcharge + 12% interest per annum + ₱1,000 compromise penalty</li>
+                    <li>Keep supporting documents (invoices, official receipts, contracts) for at least 3 years</li>
+                    <li>Ensure correct ATC (Alphanumeric Tax Code) for each transaction type</li>
+                    <li>To record withholding tax: Add tax type "EWT" or "FINAL_WHT" in journal entries</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-3 text-muted no-print">
+        <small>Generated on {{ "now"|date:"M d, Y g:i A" }}</small>
+    </div>
+</div>
+
+<style>
+@media print {
+    .no-print { display: none !important; }
+    .navbar { display: none !important; }
+    body { padding: 0; margin: 20px; }
+    .card { border: none; box-shadow: none !important; }
+    h1 { font-size: 20px; }
+    h5 { font-size: 14px; }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,137 @@
+{% extends 'ledger/base.html' %}
+
+{% block title %}Trial Balance{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="display-6"><i class="bi bi-calculator"></i> Trial Balance</h1>
+            <p class="text-muted mb-0">
+                {% if date_from and date_to %}
+                    Period: {{ date_from|date:"M d, Y" }} to {{ date_to|date:"M d, Y" }}
+                {% elif date_from %}
+                    From: {{ date_from|date:"M d, Y" }}
+                {% elif date_to %}
+                    As of: {{ date_to|date:"M d, Y" }}
+                {% else %}
+                    All Transactions
+                {% endif %}
+            </p>
+        </div>
+        <div>
+            <button onclick="window.print()" class="btn btn-primary">
+                <i class="bi bi-printer"></i> Print
+            </button>
+            <a href="/reports/income-statement/" class="btn btn-outline-secondary">
+                Income Statement
+            </a>
+            <a href="/reports/balance-sheet/" class="btn btn-outline-secondary">
+                Balance Sheet
+            </a>
+        </div>
+    </div>
+
+    <!-- Date Filter -->
+    <div class="card shadow mb-4 no-print">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold">From Date</label>
+                    {{ filter_form.date_from }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold">To Date</label>
+                    {{ filter_form.date_to }}
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary w-100" style="margin-top: 28px;">
+                        <i class="bi bi-funnel"></i> Apply Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Trial Balance Table -->
+    <div class="card shadow">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 15%;">Account Code</th>
+                            <th style="width: 40%;">Account Name</th>
+                            <th style="width: 10%;">Type</th>
+                            <th class="text-end" style="width: 17.5%;">Debits</th>
+                            <th class="text-end" style="width: 17.5%;">Credits</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in accounts_data %}
+                            <tr>
+                                <td><strong>{{ item.account.code }}</strong></td>
+                                <td>{{ item.account.name }}</td>
+                                <td>
+                                    <small class="badge bg-secondary">{{ item.account.get_account_type_display }}</small>
+                                </td>
+                                <td class="text-end">
+                                    {% if item.debits > 0 %}
+                                        ₱{{ item.debits|floatformat:2 }}
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    {% if item.credits > 0 %}
+                                        ₱{{ item.credits|floatformat:2 }}
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">
+                                    No transactions found for the selected period.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="table-secondary">
+                        <tr class="fw-bold">
+                            <td colspan="3" class="text-end">TOTALS:</td>
+                            <td class="text-end">₱{{ total_debits|floatformat:2 }}</td>
+                            <td class="text-end">₱{{ total_credits|floatformat:2 }}</td>
+                        </tr>
+                        <tr class="table-{% if is_balanced %}success{% else %}danger{% endif %}">
+                            <td colspan="3" class="text-end fw-bold">BALANCE STATUS:</td>
+                            <td colspan="2" class="text-center fw-bold">
+                                {% if is_balanced %}
+                                    <i class="bi bi-check-circle-fill text-success"></i> Balanced
+                                {% else %}
+                                    <i class="bi bi-exclamation-triangle-fill text-danger"></i> Not Balanced
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-3 text-muted no-print">
+        <small>Generated on {{ "now"|date:"M d, Y g:i A" }}</small>
+    </div>
+</div>
+
+<style>
+@media print {
+    .no-print { display: none !important; }
+    .navbar { display: none !important; }
+    body { padding: 0; margin: 20px; }
+    .card { border: none; box-shadow: none !important; }
+    h1 { font-size: 20px; }
+}
+</style>
+{% endblock %}

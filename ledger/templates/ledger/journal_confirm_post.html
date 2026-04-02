@@ -1,0 +1,64 @@
+{% extends 'ledger/base.html' %}
+
+{% block title %}Post Journal{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow border-success">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-check-circle"></i> Confirm Post Journal
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p class="lead">Are you sure you want to post this journal entry?</p>
+                    
+                    <div class="alert alert-info">
+                        <strong>Journal Details:</strong><br>
+                        <strong>Number:</strong> {{ journal.journal_number }}<br>
+                        <strong>Date:</strong> {{ journal.transaction_date|date:"F d, Y" }}<br>
+                        <strong>Description:</strong> {{ journal.description }}<br>
+                        <strong>Debits:</strong> ₱{{ journal.total_debits|floatformat:2 }}<br>
+                        <strong>Credits:</strong> ₱{{ journal.total_credits|floatformat:2 }}<br>
+                        <strong>Status:</strong> 
+                        {% if journal.is_balanced %}
+                            <span class="badge bg-success">✓ Balanced</span>
+                        {% else %}
+                            <span class="badge bg-danger">⚠ Not Balanced</span>
+                        {% endif %}
+                    </div>
+                    
+                    {% if not journal.is_balanced %}
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle"></i> 
+                            <strong>Warning:</strong> This journal is not balanced and cannot be posted!
+                        </div>
+                        <div class="text-center">
+                            <a href="/journals/{{ journal.pk }}/" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Go Back
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <i class="bi bi-info-circle"></i> 
+                            <strong>Important:</strong> Once posted, this journal entry will be finalized and can only be voided (not edited).
+                        </div>
+                        
+                        <form method="post" class="d-flex justify-content-between">
+                            {% csrf_token %}
+                            <a href="/journals/{{ journal.pk }}/" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check-circle"></i> Yes, Post Journal
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

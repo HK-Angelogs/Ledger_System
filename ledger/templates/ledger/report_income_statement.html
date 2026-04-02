@@ -1,0 +1,152 @@
+{% extends 'ledger/base.html' %}
+
+{% block title %}Income Statement{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="display-6"><i class="bi bi-graph-up"></i> Income Statement</h1>
+            <h5 class="text-muted">
+                {% if date_from and date_to %}
+                    For the Period: {{ date_from|date:"F d, Y" }} to {{ date_to|date:"F d, Y" }}
+                {% elif date_from %}
+                    From: {{ date_from|date:"F d, Y" }}
+                {% elif date_to %}
+                    Period Ending: {{ date_to|date:"F d, Y" }}
+                {% else %}
+                    All Periods
+                {% endif %}
+            </h5>
+        </div>
+        <div>
+            <button onclick="window.print()" class="btn btn-primary">
+                <i class="bi bi-printer"></i> Print
+            </button>
+            <a href="/reports/trial-balance/" class="btn btn-outline-secondary">
+                Trial Balance
+            </a>
+            <a href="/reports/balance-sheet/" class="btn btn-outline-secondary">
+                Balance Sheet
+            </a>
+        </div>
+    </div>
+
+    <!-- Date Filter -->
+    <div class="card shadow mb-4 no-print">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-5">
+                    <label class="form-label small fw-bold">From Date</label>
+                    {{ filter_form.date_from }}
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label small fw-bold">To Date</label>
+                    {{ filter_form.date_to }}
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100" style="margin-top: 28px;">
+                        <i class="bi bi-funnel"></i> Apply
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Income Statement -->
+    <div class="card shadow">
+        <div class="card-body p-4">
+            <!-- REVENUE SECTION -->
+            <h5 class="fw-bold text-primary mb-3">REVENUE</h5>
+            <table class="table table-borderless">
+                <tbody>
+                    {% for item in revenue_data %}
+                        <tr>
+                            <td style="width: 60%;" class="ps-4">
+                                <strong>{{ item.account.code }}</strong> - {{ item.account.name }}
+                            </td>
+                            <td class="text-end" style="width: 40%;">
+                                ₱{{ item.amount|floatformat:2 }}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="2" class="text-muted ps-4">No revenue recorded</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot class="border-top border-2 border-dark">
+                    <tr class="fw-bold">
+                        <td>TOTAL REVENUE</td>
+                        <td class="text-end">₱{{ total_revenue|floatformat:2 }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <hr class="my-4">
+
+            <!-- EXPENSES SECTION -->
+            <h5 class="fw-bold text-primary mb-3">EXPENSES</h5>
+            <table class="table table-borderless">
+                <tbody>
+                    {% for item in expense_data %}
+                        <tr>
+                            <td style="width: 60%;" class="ps-4">
+                                <strong>{{ item.account.code }}</strong> - {{ item.account.name }}
+                            </td>
+                            <td class="text-end" style="width: 40%;">
+                                ₱{{ item.amount|floatformat:2 }}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="2" class="text-muted ps-4">No expenses recorded</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot class="border-top border-2 border-dark">
+                    <tr class="fw-bold">
+                        <td>TOTAL EXPENSES</td>
+                        <td class="text-end">(₱{{ total_expenses|floatformat:2 }})</td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <hr class="my-4">
+
+            <!-- NET INCOME -->
+            <table class="table table-borderless">
+                <tfoot class="border-top border-3 border-dark">
+                    <tr class="fw-bold" style="font-size: 1.2rem;">
+                        <td style="width: 60%;">
+                            NET INCOME {% if net_income < 0 %}(LOSS){% endif %}
+                        </td>
+                        <td class="text-end {% if net_income >= 0 %}text-success{% else %}text-danger{% endif %}" style="width: 40%;">
+                            {% if net_income >= 0 %}
+                                ₱{{ net_income|floatformat:2 }}
+                            {% else %}
+                                (₱{{ net_income|floatformat:2|slice:"1:" }})
+                            {% endif %}
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <div class="text-center mt-3 text-muted no-print">
+        <small>Generated on {{ "now"|date:"M d, Y g:i A" }}</small>
+    </div>
+</div>
+
+<style>
+@media print {
+    .no-print { display: none !important; }
+    .navbar { display: none !important; }
+    body { padding: 0; margin: 20px; }
+    .card { border: none; box-shadow: none !important; }
+    h1 { font-size: 20px; }
+    h5 { font-size: 14px; }
+}
+</style>
+{% endblock %}

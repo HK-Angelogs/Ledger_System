@@ -1,0 +1,259 @@
+{% extends 'ledger/base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">
+                <i class="bi bi-journal-plus"></i> {{ title }}
+            </h4>
+        </div>
+        <div class="card-body">
+            <form method="post" id="journalForm">
+                {% csrf_token %}
+                
+                <!-- Header Section -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <label for="{{ form.journal_number.id_for_label }}" class="form-label fw-bold">
+                            {{ form.journal_number.label }}
+                        </label>
+                        {{ form.journal_number }}
+                        <small class="form-text text-muted">Auto-generated if blank</small>
+                        {% if form.journal_number.errors %}
+                            <div class="text-danger small">{{ form.journal_number.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="{{ form.transaction_date.id_for_label }}" class="form-label fw-bold">
+                            {{ form.transaction_date.label }} <span class="text-danger">*</span>
+                        </label>
+                        {{ form.transaction_date }}
+                        {% if form.transaction_date.errors %}
+                            <div class="text-danger small">{{ form.transaction_date.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="{{ form.reference.id_for_label }}" class="form-label fw-bold">
+                            {{ form.reference.label }}
+                        </label>
+                        {{ form.reference }}
+                        {% if form.reference.errors %}
+                            <div class="text-danger small">{{ form.reference.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <label for="{{ form.description.id_for_label }}" class="form-label fw-bold">
+                            {{ form.description.label }} <span class="text-danger">*</span>
+                        </label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="text-danger small">{{ form.description.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <hr>
+
+                <!-- Lines Section -->
+                <h5 class="mb-3"><i class="bi bi-list-ul"></i> Journal Lines</h5>
+                
+                {{ formset.management_form }}
+                
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="linesTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 50px;">Line</th>
+                                <th style="width: 250px;">Account <span class="text-danger">*</span></th>
+                                <th style="width: 200px;">Description</th>
+                                <th style="width: 120px;">Debit</th>
+                                <th style="width: 120px;">Credit</th>
+                                <th style="width: 150px;">Tax Type</th>
+                                <th style="width: 100px;">Tax Base</th>
+                                <th style="width: 80px;">Tax Rate %</th>
+                                <th style="width: 100px;">Tax Amount</th>
+                                <th style="width: 80px;">Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody id="linesTableBody">
+                            {% for line_form in formset %}
+                                <tr class="line-row">
+                                    <td>
+                                        {{ line_form.id }}
+                                        {{ line_form.line_number }}
+                                    </td>
+                                    <td>{{ line_form.account }}</td>
+                                    <td>{{ line_form.description }}</td>
+                                    <td>{{ line_form.debit_amount }}</td>
+                                    <td>{{ line_form.credit_amount }}</td>
+                                    <td>{{ line_form.tax_type }}</td>
+                                    <td>{{ line_form.tax_base_amount }}</td>
+                                    <td>{{ line_form.tax_rate }}</td>
+                                    <td>{{ line_form.tax_amount }}</td>
+                                    <td class="text-center">
+                                        {{ line_form.DELETE }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-secondary fw-bold">
+                                <td colspan="3" class="text-end">TOTALS:</td>
+                                <td class="text-end">
+                                    <span id="totalDebits">₱0.00</span>
+                                </td>
+                                <td class="text-end">
+                                    <span id="totalCredits">₱0.00</span>
+                                </td>
+                                <td colspan="5" class="text-center">
+                                    <span id="balanceStatus" class="badge bg-secondary">Not Balanced</span>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <button type="button" class="btn btn-sm btn-outline-success mb-4" id="addLineBtn">
+                    <i class="bi bi-plus-circle"></i> Add Line
+                </button>
+
+                <hr>
+
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-between">
+                    <a href="/journals/" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary btn-lg" id="saveBtn">
+                        <i class="bi bi-check-circle"></i> Save Journal Entry
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const formset = document.getElementById('linesTableBody');
+    const addLineBtn = document.getElementById('addLineBtn');
+    const totalFormsInput = document.getElementById('id_lines-TOTAL_FORMS');
+    
+    // Calculate totals and check balance
+    function updateTotals() {
+        let totalDebits = 0;
+        let totalCredits = 0;
+        
+        document.querySelectorAll('.line-row').forEach(row => {
+            const deleteCheckbox = row.querySelector('input[type="checkbox"][name$="-DELETE"]');
+            if (!deleteCheckbox || !deleteCheckbox.checked) {
+                const debitInput = row.querySelector('input[name$="-debit_amount"]');
+                const creditInput = row.querySelector('input[name$="-credit_amount"]');
+                
+                const debit = parseFloat(debitInput.value) || 0;
+                const credit = parseFloat(creditInput.value) || 0;
+                
+                totalDebits += debit;
+                totalCredits += credit;
+            }
+        });
+        
+        document.getElementById('totalDebits').textContent = '₱' + totalDebits.toFixed(2);
+        document.getElementById('totalCredits').textContent = '₱' + totalCredits.toFixed(2);
+        
+        const balanceStatus = document.getElementById('balanceStatus');
+        const diff = Math.abs(totalDebits - totalCredits);
+        
+        if (diff < 0.01 && totalDebits > 0) {
+            balanceStatus.textContent = '✓ Balanced';
+            balanceStatus.className = 'badge bg-success';
+        } else {
+            balanceStatus.textContent = 'Not Balanced (Diff: ₱' + diff.toFixed(2) + ')';
+            balanceStatus.className = 'badge bg-danger';
+        }
+    }
+    
+    // Add new line
+    addLineBtn.addEventListener('click', function() {
+        const totalForms = parseInt(totalFormsInput.value);
+        const newRow = document.querySelector('.line-row').cloneNode(true);
+        
+        // Update form indices
+        newRow.innerHTML = newRow.innerHTML.replace(/lines-\d+-/g, `lines-${totalForms}-`);
+        newRow.innerHTML = newRow.innerHTML.replace(/lines_\d+_/g, `lines_${totalForms}_`);
+        
+        // Clear values
+        newRow.querySelectorAll('input, select, textarea').forEach(input => {
+            if (input.type === 'checkbox') {
+                input.checked = false;
+            } else {
+                input.value = '';
+            }
+        });
+        
+        // Set line number
+        const lineNumInput = newRow.querySelector('input[name$="-line_number"]');
+        if (lineNumInput) {
+            lineNumInput.value = totalForms + 1;
+        }
+        
+        formset.appendChild(newRow);
+        totalFormsInput.value = totalForms + 1;
+        
+        attachEventListeners(newRow);
+        updateTotals();
+    });
+    
+    // Attach event listeners to inputs
+    function attachEventListeners(row) {
+        row.querySelectorAll('input[name$="-debit_amount"], input[name$="-credit_amount"]').forEach(input => {
+            input.addEventListener('input', updateTotals);
+        });
+        
+        row.querySelector('input[type="checkbox"][name$="-DELETE"]')?.addEventListener('change', function() {
+            if (this.checked) {
+                row.style.opacity = '0.5';
+                row.style.textDecoration = 'line-through';
+            } else {
+                row.style.opacity = '1';
+                row.style.textDecoration = 'none';
+            }
+            updateTotals();
+        });
+    }
+    
+    // Initialize event listeners on existing rows
+    document.querySelectorAll('.line-row').forEach(attachEventListeners);
+    
+    // Initial totals calculation
+    updateTotals();
+    
+    // Form submission validation
+    document.getElementById('journalForm').addEventListener('submit', function(e) {
+        const totalDebits = parseFloat(document.getElementById('totalDebits').textContent.replace('₱', ''));
+        const totalCredits = parseFloat(document.getElementById('totalCredits').textContent.replace('₱', ''));
+        const diff = Math.abs(totalDebits - totalCredits);
+        
+        if (diff >= 0.01) {
+            e.preventDefault();
+            alert('Journal entry is not balanced! Please ensure debits equal credits.\n\nDebits: ₱' + totalDebits.toFixed(2) + '\nCredits: ₱' + totalCredits.toFixed(2) + '\nDifference: ₱' + diff.toFixed(2));
+            return false;
+        }
+        
+        if (totalDebits === 0) {
+            e.preventDefault();
+            alert('Please enter at least one debit and one credit entry.');
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}

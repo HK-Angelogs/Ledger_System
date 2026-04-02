@@ -1,0 +1,193 @@
+{% extends 'ledger/base.html' %}
+
+{% block title %}Income Tax Summary{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="display-6"><i class="bi bi-cash-coin"></i> Income Tax Summary</h1>
+            <h5 class="text-muted">BIR Form 1702 - Annual Income Tax Return</h5>
+            <p class="text-muted mb-0">
+                {% if date_from and date_to %}
+                    Period: {{ date_from|date:"M d, Y" }} to {{ date_to|date:"M d, Y" }}
+                {% else %}
+                    Taxable Year: 2026
+                {% endif %}
+            </p>
+        </div>
+        <div>
+            <button onclick="window.print()" class="btn btn-primary">
+                <i class="bi bi-printer"></i> Print
+            </button>
+            <a href="/taxes/" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Tax Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Date Filter -->
+    <div class="card shadow mb-4 no-print">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">Year</label>
+                    {{ filter_form.year }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">From Date</label>
+                    {{ filter_form.date_from }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">To Date</label>
+                    {{ filter_form.date_to }}
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100" style="margin-top: 28px;">
+                        <i class="bi bi-funnel"></i> Apply
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Income Tax Summary -->
+    <div class="card shadow">
+        <div class="card-body p-4">
+            <!-- PART I: Gross Income -->
+            <h5 class="fw-bold text-primary mb-3">PART I: GROSS INCOME</h5>
+            <table class="table table-borderless">
+                <tbody>
+                    <tr>
+                        <td style="width: 70%;" class="ps-4">
+                            Business Income (Gross Receipts/Sales)
+                        </td>
+                        <td class="text-end fw-bold" style="width: 30%;">
+                            ₱{{ revenue|floatformat:2 }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="ps-4">Other Income (Interest, Dividends, etc.)</td>
+                        <td class="text-end">₱0.00</td>
+                    </tr>
+                </tbody>
+                <tfoot class="border-top border-2 border-dark">
+                    <tr class="fw-bold">
+                        <td>TOTAL GROSS INCOME</td>
+                        <td class="text-end">₱{{ revenue|floatformat:2 }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <hr class="my-4">
+
+            <!-- PART II: Deductions -->
+            <h5 class="fw-bold text-primary mb-3">PART II: DEDUCTIONS</h5>
+            <table class="table table-borderless">
+                <tbody>
+                    <tr>
+                        <td style="width: 70%;" class="ps-4">
+                            Cost of Sales/Services
+                        </td>
+                        <td class="text-end fw-bold" style="width: 30%;">
+                            ₱{{ expenses|floatformat:2 }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="ps-4">Operating Expenses</td>
+                        <td class="text-end">₱0.00</td>
+                    </tr>
+                </tbody>
+                <tfoot class="border-top border-2 border-dark">
+                    <tr class="fw-bold">
+                        <td>TOTAL DEDUCTIONS</td>
+                        <td class="text-end">(₱{{ expenses|floatformat:2 }})</td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <hr class="my-4">
+
+            <!-- PART III: Taxable Income -->
+            <h5 class="fw-bold text-primary mb-3">PART III: TAXABLE INCOME</h5>
+            <table class="table table-borderless">
+                <tbody>
+                    <tr>
+                        <td style="width: 70%;" class="ps-4">Gross Income</td>
+                        <td class="text-end" style="width: 30%;">₱{{ revenue|floatformat:2 }}</td>
+                    </tr>
+                    <tr>
+                        <td class="ps-4">Less: Deductions</td>
+                        <td class="text-end">(₱{{ expenses|floatformat:2 }})</td>
+                    </tr>
+                </tbody>
+                <tfoot class="border-top border-2 border-dark">
+                    <tr class="fw-bold">
+                        <td>TAXABLE INCOME</td>
+                        <td class="text-end text-success">₱{{ taxable_income|floatformat:2 }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <hr class="my-4">
+
+            <!-- PART IV: Tax Computation -->
+            <h5 class="fw-bold text-primary mb-3">PART IV: TAX COMPUTATION</h5>
+            <table class="table table-borderless">
+                <tbody>
+                    <tr>
+                        <td style="width: 70%;" class="ps-4">
+                            Taxable Income (8% rate for individuals/sole proprietors)
+                        </td>
+                        <td class="text-end" style="width: 30%;">₱{{ taxable_income|floatformat:2 }}</td>
+                    </tr>
+                    <tr>
+                        <td class="ps-4">Tax Rate</td>
+                        <td class="text-end">8%</td>
+                    </tr>
+                </tbody>
+                <tfoot class="border-top border-3 border-dark">
+                    <tr class="fw-bold" style="font-size: 1.2rem;">
+                        <td>INCOME TAX DUE</td>
+                        <td class="text-end text-danger">₱{{ tax_8_percent|floatformat:2 }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <!-- Filing Instructions -->
+            <div class="alert alert-warning mt-4">
+                <h6 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> Tax Rate Note:</h6>
+                <p class="mb-2">This calculation uses the 8% tax rate for individuals/sole proprietors under the graduated income tax system (TRAIN Law).</p>
+                <p class="mb-0">
+                    <strong>Alternative:</strong> You may opt for the regular graduated income tax rates (0% to 35%) if more beneficial.
+                </p>
+            </div>
+
+            <div class="alert alert-info mt-3">
+                <h6 class="alert-heading"><i class="bi bi-info-circle"></i> Filing Reminders:</h6>
+                <ul class="mb-0">
+                    <li>File BIR Form 1702 on or before April 15 of the following year</li>
+                    <li>Pay income tax due at any Authorized Agent Bank (AAB)</li>
+                    <li>Attach: Audited Financial Statements (if applicable), ITR attachments</li>
+                    <li>Consider quarterly income tax payments (Form 1701Q) to avoid penalties</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-3 text-muted no-print">
+        <small>Generated on {{ "now"|date:"M d, Y g:i A" }}</small>
+    </div>
+</div>
+
+<style>
+@media print {
+    .no-print { display: none !important; }
+    .navbar { display: none !important; }
+    body { padding: 0; margin: 20px; }
+    .card { border: none; box-shadow: none !important; }
+    h1 { font-size: 20px; }
+    h5 { font-size: 14px; }
+}
+</style>
+{% endblock %}

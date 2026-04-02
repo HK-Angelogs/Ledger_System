@@ -1,0 +1,184 @@
+{% extends 'ledger/base.html' %}
+
+{% block title %}Balance Sheet{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="display-6"><i class="bi bi-clipboard-data"></i> Balance Sheet</h1>
+            <h5 class="text-muted">
+                {% if date_to %}
+                    As of {{ date_to|date:"F d, Y" }}
+                {% else %}
+                    As of {{ "now"|date:"F d, Y" }}
+                {% endif %}
+            </h5>
+        </div>
+        <div>
+            <button onclick="window.print()" class="btn btn-primary">
+                <i class="bi bi-printer"></i> Print
+            </button>
+            <a href="/reports/trial-balance/" class="btn btn-outline-secondary">
+                Trial Balance
+            </a>
+            <a href="/reports/income-statement/" class="btn btn-outline-secondary">
+                Income Statement
+            </a>
+        </div>
+    </div>
+
+    <!-- Date Filter -->
+    <div class="card shadow mb-4 no-print">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-10">
+                    <label class="form-label small fw-bold">As of Date</label>
+                    {{ filter_form.date_to }}
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100" style="margin-top: 28px;">
+                        <i class="bi bi-funnel"></i> Apply
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Balance Sheet -->
+    <div class="card shadow">
+        <div class="card-body p-4">
+            <!-- ASSETS SECTION -->
+            <h5 class="fw-bold text-primary mb-3">ASSETS</h5>
+            <table class="table table-borderless">
+                <tbody>
+                    {% if asset_data %}
+                        <tr>
+                            <td colspan="2" class="fw-bold text-muted">Current Assets:</td>
+                        </tr>
+                        {% for item in asset_data %}
+                            <tr>
+                                <td style="width: 60%;" class="ps-4">
+                                    <strong>{{ item.account.code }}</strong> - {{ item.account.name }}
+                                </td>
+                                <td class="text-end" style="width: 40%;">
+                                    ₱{{ item.balance|floatformat:2 }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="2" class="text-muted ps-4">No asset accounts with balance</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+                <tfoot class="border-top border-2 border-dark">
+                    <tr class="fw-bold">
+                        <td>TOTAL ASSETS</td>
+                        <td class="text-end">₱{{ total_assets|floatformat:2 }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <hr class="my-4">
+
+            <!-- LIABILITIES SECTION -->
+            <h5 class="fw-bold text-primary mb-3">LIABILITIES</h5>
+            <table class="table table-borderless">
+                <tbody>
+                    {% if liability_data %}
+                        <tr>
+                            <td colspan="2" class="fw-bold text-muted">Current Liabilities:</td>
+                        </tr>
+                        {% for item in liability_data %}
+                            <tr>
+                                <td style="width: 60%;" class="ps-4">
+                                    <strong>{{ item.account.code }}</strong> - {{ item.account.name }}
+                                </td>
+                                <td class="text-end" style="width: 40%;">
+                                    ₱{{ item.balance|floatformat:2 }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="2" class="text-muted ps-4">No liability accounts with balance</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+                <tfoot class="border-top border-2 border-dark">
+                    <tr class="fw-bold">
+                        <td>TOTAL LIABILITIES</td>
+                        <td class="text-end">₱{{ total_liabilities|floatformat:2 }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <hr class="my-4">
+
+            <!-- EQUITY SECTION -->
+            <h5 class="fw-bold text-primary mb-3">EQUITY</h5>
+            <table class="table table-borderless">
+                <tbody>
+                    {% for item in equity_data %}
+                        <tr>
+                            <td style="width: 60%;" class="ps-4">
+                                <strong>{{ item.account.code }}</strong> - {{ item.account.name }}
+                            </td>
+                            <td class="text-end" style="width: 40%;">
+                                ₱{{ item.balance|floatformat:2 }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    <tr>
+                        <td class="ps-4">Retained Earnings (Net Income)</td>
+                        <td class="text-end">₱{{ retained_earnings|floatformat:2 }}</td>
+                    </tr>
+                </tbody>
+                <tfoot class="border-top border-2 border-dark">
+                    <tr class="fw-bold">
+                        <td>TOTAL EQUITY</td>
+                        <td class="text-end">₱{{ total_equity|floatformat:2 }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <hr class="my-4">
+
+            <!-- TOTAL LIABILITIES & EQUITY -->
+            <table class="table table-borderless">
+                <tfoot class="border-top border-3 border-dark">
+                    <tr class="fw-bold" style="font-size: 1.1rem;">
+                        <td style="width: 60%;">TOTAL LIABILITIES & EQUITY</td>
+                        <td class="text-end" style="width: 40%;">₱{{ total_liabilities_equity|floatformat:2 }}</td>
+                    </tr>
+                    <tr class="table-{% if is_balanced %}success{% else %}danger{% endif %}">
+                        <td colspan="2" class="text-center fw-bold">
+                            {% if is_balanced %}
+                                <i class="bi bi-check-circle-fill text-success"></i> Balance Sheet Balanced
+                            {% else %}
+                                <i class="bi bi-exclamation-triangle-fill text-danger"></i> Not Balanced
+                            {% endif %}
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <div class="text-center mt-3 text-muted no-print">
+        <small>Generated on {{ "now"|date:"M d, Y g:i A" }}</small>
+    </div>
+</div>
+
+<style>
+@media print {
+    .no-print { display: none !important; }
+    .navbar { display: none !important; }
+    body { padding: 0; margin: 20px; }
+    .card { border: none; box-shadow: none !important; }
+    h1 { font-size: 20px; }
+    h5 { font-size: 14px; }
+}
+</style>
+{% endblock %}
