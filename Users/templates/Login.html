@@ -20,14 +20,16 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
 
-    <!-- Template Stylesheet -->
-    <link href="{% static 'css/Login.css' %}" rel="stylesheet">
-
-    <!-- Customized Bootstrap Stylesheet -->
+        <!-- Customized Bootstrap Stylesheet -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.css" rel="stylesheet">
 
+    <!-- Template Stylesheet -->
+    <link href="{% static 'css/Login.css' %}" rel="stylesheet">
+
 </head>
+
+<body>
 
 <section class="vh-100">
   <div class="container-fluid h-custom">
@@ -37,65 +39,61 @@
           class="img-fluid" alt="Sample image">
       </div>
       <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
-        <form>
           <div class="d-flex flex-row align-items-center justify-content-center justify-content-lg-start">
-            <p class="lead fw-normal mb-0 me-3">Sign in with</p>
-            <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-floating mx-1">
-              <i class="fab fa-facebook-f"></i>
-            </button>
-
-            <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-floating mx-1">
-              <i class="fab fa-twitter"></i>
-            </button>
-
-            <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-floating mx-1">
-              <i class="fab fa-linkedin-in"></i>
-            </button>
+            <p class="lead fw-normal mb-0 me-3">Login Here
           </div>
 
           <div class="divider d-flex align-items-center my-4">
-            <p class="text-center fw-bold mx-3 mb-0">Or</p>
+            <p class="text-center fw-bold mx-3 mb-0"></p>
           </div>
+        
+        <!-- Messages -->
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
 
-          <!-- Username input -->
-        <form method="POST">
-        {% csrf_token %} <div class="form-outline mb-4">
-        <div class="form-outline mb-4" data-mdb-input-init> <input type="text" name="username" id="form3Example3" class="form-control form-control-lg" required />
-          <label class="form-label" for="form3Example3">Username</label>
+        <!-- Username input -->
+        <form method="POST" action="{% url 'login' %}">
+        {% csrf_token %} 
+        <div class="form-outline mb-4" data-mdb-input-init> 
+          <input type="text" name="username" id="username" class="form-control form-control-lg" required />
+          <label class="form-label" for="username">Username</label>
         </div>
 
           <!-- Password input -->
-        <div class="form-outline mb-3" data-mdb-input-init> <input type="password" name="password" id="form3Example4" class="form-control form-control-lg" required />
-          <label class="form-label" for="form3Example4">Password</label>
+        <div class="form-outline mb-3" data-mdb-input-init> <input type="password" name="password" id="password" class="form-control form-control-lg" required />
+          <label class="form-label" for="password">Password</label>
         </div>
 
-          <!-- Login Button -->        
-            <div class="text-center text-lg-start mt-4 pt-2">
-        <button type="submit" class="btn btn-primary btn-lg"
-        style="padding-left: 2.5rem; padding-right: 2.5rem;">Login</button>
-        
-        </div>
-        </form>
-
-          <div class="d-flex justify-content-between align-items-center">
-            <!-- Checkbox -->
-            <div class="form-check mb-0">
-              <input class="form-check-input me-2" type="checkbox" value="" id="form2Example3" />
-              <label class="form-check-label" for="form2Example3">
-                Remember me
-              </label>
-            </div>
+        <div class="d-flex justify-content-between align-items-center">
+          <!-- Checkbox -->
+          <div class="form-check mb-0">
+            <input class="form-check-input me-2" type="checkbox" value="" id="form2Example3" />
+                <label class="form-check-label" for="form2Example3">
+                  Remember me
+                </label>
+          </div>
             <a href="#!" class="text-body">Forgot password?</a>
-          </div>
+        </div>
+        
+          <!-- Login Button -->        
+        <div class="text-center text-lg-start mt-4 pt-2">
+          <button type="submit" class="btn btn-primary btn-lg"
+          style="padding-left: 2.5rem; padding-right: 2.5rem;">Login</button>
+        </div>
 
-          <div class="text-center text-lg-start mt-4 pt-2">
-            <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-lg"
-              style="padding-left: 2.5rem; padding-right: 2.5rem;">Login</button>
-            <p class="small fw-bold mt-2 pt-1 mb-0">Don't have an account? <a href="#!"
-                class="link-danger">Register</a></p>
-          </div>
+        <div class="text-center text-lg-start mt-4 pt-2">
+          <p class="small fw-bold mt-2 pt-1 mb-0">Don't have an account? <a href="#!"
+              class="link-danger">Register</a></p>
+        </div>
 
         </form>
+
       </div>
     </div>
   </div>
@@ -134,3 +132,6 @@
     new mdb.Input(formOutline).init();
   });
 </script>
+
+</body>
+</html>

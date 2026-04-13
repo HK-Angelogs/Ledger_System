@@ -13,18 +13,18 @@
         </div>
         <div>
             {% if journal.status == 'DRAFT' %}
-                <a href="/journals/{{ journal.pk }}/edit/" class="btn btn-primary">
+                <a href="{% url 'journal_edit' journal.pk %}" class="btn btn-primary">
                     <i class="bi bi-pencil"></i> Edit
                 </a>
-                <a href="/journals/{{ journal.pk }}/post/" class="btn btn-success">
+                <a href="{% url 'journal_post' journal.pk %}" class="btn btn-success">
                     <i class="bi bi-check-circle"></i> Post Journal
                 </a>
             {% elif journal.status == 'POSTED' %}
-                <a href="/journals/{{ journal.pk }}/void/" class="btn btn-warning">
+                <a href="{% url 'journal_void' journal.pk %}" class="btn btn-warning">
                     <i class="bi bi-x-circle"></i> Void Journal
                 </a>
             {% endif %}
-            <a href="/journals/" class="btn btn-secondary">
+            <a href="{% url 'journals_list' %}" class="btn btn-secondary">
                 <i class="bi bi-arrow-left"></i> Back to List
             </a>
         </div>

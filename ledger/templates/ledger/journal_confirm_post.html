@@ -36,7 +36,7 @@
                             <strong>Warning:</strong> This journal is not balanced and cannot be posted!
                         </div>
                         <div class="text-center">
-                            <a href="/journals/{{ journal.pk }}/" class="btn btn-secondary">
+                            <a href="{% url 'journal_detail' journal.pk %}" class="btn btn-secondary">
                                 <i class="bi bi-arrow-left"></i> Go Back
                             </a>
                         </div>

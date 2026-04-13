@@ -1,27 +1,34 @@
+# Users/views.py
+
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
 from django.contrib.auth import logout
 
+
 # Create your views here.
 
 
 def login_view(request):
-    if request.method == 'POST':
-        # Grab data from the 'name' attributes in the HTML
-        un = request.POST.get('username')
-        pw = request.POST.get('password')
+    # Authentication Anti Redirection
+    if request.user.is_authenticated:
+        return redirect('dashboard')
 
-        # Django checks the password hash and the role in db.sqlite3
-        user = authenticate(request, username=un, password=pw)
+    if request.method == "POST":
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        # Authentication
+        user = authenticate(request, username=username, password=password)
 
         if user is not None:
             login(request, user)
             return redirect('dashboard')  # Redirect to your main page
         else:
             messages.error(request, "Invalid username or password.")
+            return redirect('login')
 
-    return render(request, 'Login.html')
+    return render(request, 'Login.html', {})
 
 
 def logout_view(request):

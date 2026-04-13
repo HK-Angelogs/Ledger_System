@@ -29,7 +29,7 @@
                     
                     <form method="post" class="d-flex justify-content-between">
                         {% csrf_token %}
-                        <a href="/accounts/" class="btn btn-secondary">
+                        <a href="{% url 'accounts_list' %}" class="btn btn-secondary">
                             <i class="bi bi-arrow-left"></i> Cancel
                         </a>
                         <button type="submit" class="btn btn-danger">

@@ -1,0 +1,70 @@
+.
+├── accounting_system
+│   ├── asgi.py
+│   ├── __init__.py
+│   ├── settings.py
+│   ├── static
+│   ├── urls.py
+│   └── wsgi.py
+├── db.sqlite3
+├── ledger
+│   ├── admin.py
+│   ├── apps.py
+│   ├── forms.py
+│   ├── __init__.py
+│   ├── migrations
+│   │   ├── 0001_initial.py
+│   │   ├── 0002_alter_journalline_tax_amount_and_more.py
+│   │   ├── 0003_journalline_created_by.py
+│   │   └── __init__.py
+│   ├── models.py
+│   ├── static
+│   ├── templates
+│   │   └── ledger
+│   │       ├── account_confirm_delete.html
+│   │       ├── account_form.html
+│   │       ├── accounts_list.html
+│   │       ├── base copy.html
+│   │       ├── base.html
+│   │       ├── dashboard copy.html
+│   │       ├── dashboard.html
+│   │       ├── journal_confirm_post.html
+│   │       ├── journal_confirm_void.html
+│   │       ├── journal_detail.html
+│   │       ├── journal_form.html
+│   │       ├── journals_list.html
+│   │       ├── report_balance_sheet.html
+│   │       ├── report_chart_of_accounts.html
+│   │       ├── report_general_ledger.html
+│   │       ├── report_income_statement.html
+│   │       ├── report_income_tax.html
+│   │       ├── report_tax_liabilities.html
+│   │       ├── report_trial_balance.html
+│   │       ├── report_vat_summary.html
+│   │       ├── report_withholding_tax.html
+│   │       └── taxes_dashboard.html
+│   ├── tests.py
+│   ├── urls.py
+│   └── views.py
+├── manage.py
+├── README.md
+├── requirements.txt
+├── tree.txt
+└── Users
+    ├── admin.py
+    ├── apps.py
+    ├── __init__.py
+    ├── migrations
+    │   ├── 0001_initial.py
+    │   └── __init__.py
+    ├── models.py
+    ├── static
+    │   └── css
+    │       └── Login.css
+    ├── templates
+    │   └── Login.html
+    ├── tests.py
+    ├── urls.py
+    └── views.py
+
+13 directories, 55 files

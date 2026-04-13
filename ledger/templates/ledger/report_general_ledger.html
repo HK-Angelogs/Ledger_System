@@ -32,7 +32,7 @@
                     <i class="bi bi-printer"></i> Print
                 </button>
             {% endif %}
-            <a href="/reports/trial-balance/" class="btn btn-outline-secondary">
+            <a href="{% url 'report_trial_balance' %}" class="btn btn-outline-secondary">
                 Trial Balance
             </a>
         </div>
@@ -90,7 +90,7 @@
                                 <tr>
                                     <td>{{ entry.date|date:"M d, Y" }}</td>
                                     <td>
-                                        <a href="/journals/{{ entry.journal.id }}/" class="text-decoration-none" target="_blank">
+                                        <a href="{% url 'journal_detail' entry.journal.id %}" class="text-decoration-none" target="_blank">
                                             {{ entry.journal }}
                                         </a>
                                     </td>

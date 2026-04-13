@@ -10,7 +10,7 @@
             <p class="text-muted">BIR Compliance & Tax Filing Reports</p>
         </div>
         <div>
-            <a href="/reports/trial-balance/" class="btn btn-outline-primary">
+            <a href="{% url 'report_trial_balance' %}" class="btn btn-outline-primary">
                 <i class="bi bi-arrow-left"></i> Back to Financial Reports
             </a>
         </div>
@@ -36,7 +36,7 @@
                         <li><i class="bi bi-check-circle text-success"></i> Input VAT Tracking</li>
                         <li><i class="bi bi-check-circle text-success"></i> VAT Payable Summary</li>
                     </ul>
-                    <a href="/taxes/vat-summary/" class="btn btn-primary w-100">
+                    <a href="{% url 'report_vat_summary' %}" class="btn btn-primary w-100">
                         <i class="bi bi-arrow-right-circle"></i> View VAT Report
                     </a>
                 </div>
@@ -64,7 +64,7 @@
                         <li><i class="bi bi-check-circle text-success"></i> Taxable Income</li>
                         <li><i class="bi bi-check-circle text-success"></i> Tax Due Calculation</li>
                     </ul>
-                    <a href="/taxes/income-tax/" class="btn btn-success w-100">
+                    <a href="{% url 'report_income_tax' %}" class="btn btn-success w-100">
                         <i class="bi bi-arrow-right-circle"></i> View Income Tax Report
                     </a>
                 </div>
@@ -92,7 +92,7 @@
                         <li><i class="bi bi-check-circle text-success"></i> By Transaction Type</li>
                         <li><i class="bi bi-check-circle text-success"></i> Monthly Summary</li>
                     </ul>
-                    <a href="/taxes/withholding/" class="btn btn-warning w-100">
+                    <a href="{% url 'report_withholding_tax' %}"class="btn btn-warning w-100">
                         <i class="bi bi-arrow-right-circle"></i> View Withholding Report
                     </a>
                 </div>
@@ -120,7 +120,7 @@
                         <li><i class="bi bi-check-circle text-success"></i> Other Tax Liabilities</li>
                         <li><i class="bi bi-check-circle text-success"></i> Payment Tracking</li>
                     </ul>
-                    <a href="/taxes/liabilities/" class="btn btn-danger w-100">
+                    <a href="{% url 'report_tax_liabilities' %}" class="btn btn-danger w-100">
                         <i class="bi bi-arrow-right-circle"></i> View Tax Liabilities
                     </a>
                 </div>
@@ -141,9 +141,9 @@
                 <div class="col-md-4">
                     <h6><i class="bi bi-journal-text"></i> Related Reports</h6>
                     <ul class="list-unstyled">
-                        <li><a href="/reports/trial-balance/" class="text-decoration-none">Trial Balance</a></li>
-                        <li><a href="/reports/income-statement/" class="text-decoration-none">Income Statement</a></li>
-                        <li><a href="/reports/balance-sheet/" class="text-decoration-none">Balance Sheet</a></li>
+                        <li><a href="{% url 'report_trial_balance' %}" class="text-decoration-none">Trial Balance</a></li>
+                        <li><a href="{% url 'report_income_statement' %}" class="text-decoration-none">Income Statement</a></li>
+                        <li><a href="{% url 'report_balance_sheet' %}" class="text-decoration-none">Balance Sheet</a></li>
                     </ul>
                 </div>
                 <div class="col-md-4">

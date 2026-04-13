@@ -22,7 +22,7 @@ from .forms import (
 )
 
 
-@login_required
+@login_required(login_url='login')
 # ==================== DASHBOARD ====================
 def dashboard(request):
     """Homepage dashboard"""
@@ -47,7 +47,7 @@ def dashboard(request):
     return render(request, 'ledger/dashboard.html', context)
 
 
-@login_required
+@login_required(login_url='login')
 # ==================== CHART OF ACCOUNTS ====================
 def accounts_list(request):
     """List all accounts with search and filter"""
@@ -87,7 +87,7 @@ def accounts_list(request):
     return render(request, 'ledger/accounts_list.html', context)
 
 
-@login_required
+@login_required(login_url='login')
 def account_add(request):
     """Add new account"""
     if request.method == 'POST':
@@ -108,7 +108,7 @@ def account_add(request):
     return render(request, 'ledger/account_form.html', context)
 
 
-@login_required
+@login_required(login_url='login')
 def account_edit(request, pk):
     """Edit existing account"""
     account = get_object_or_404(Account, pk=pk)
@@ -132,7 +132,7 @@ def account_edit(request, pk):
     return render(request, 'ledger/account_form.html', context)
 
 
-@login_required
+@login_required(login_url='login')
 def account_delete(request, pk):
     """Deactivate account (soft delete)"""
     account = get_object_or_404(Account, pk=pk)
@@ -150,7 +150,7 @@ def account_delete(request, pk):
     return render(request, 'ledger/account_confirm_delete.html', context)
 
 
-@login_required
+@login_required(login_url='login')
 # ==================== JOURNAL ENTRIES ====================
 def journals_list(request):
     """List all journal entries with search and filter"""
@@ -193,7 +193,7 @@ def journals_list(request):
     return render(request, 'ledger/journals_list.html', context)
 
 
-@login_required
+@login_required(login_url='login')
 def journal_detail(request, pk):
     """View journal entry details"""
     journal = get_object_or_404(JournalHeader, pk=pk)
@@ -206,48 +206,63 @@ def journal_detail(request, pk):
     return render(request, 'ledger/journal_detail.html', context)
 
 
-@login_required
+@login_required(login_url='login')
 @transaction.atomic
 def journal_add(request):
-    """Add new journal entry"""
     if request.method == 'POST':
         form = JournalHeaderForm(request.POST)
         formset = JournalLineFormSet(request.POST)
 
         if form.is_valid() and formset.is_valid():
-            # Create header
+            # 1. Prepare Header
             journal = form.save(commit=False)
 
-            # Auto-generate journal number if blank
+            # Auto-generate journal number logic
             if not journal.journal_number:
-                last_journal = JournalHeader.objects.order_by('-id').first()
+                # select_for_update() prevents two users from getting the same JV number
+                last_journal = JournalHeader.objects.select_for_update().order_by('-id').first()
+                last_num = 0
                 if last_journal and last_journal.journal_number:
-                    # Extract number from format JV-00001
                     try:
                         last_num = int(
                             last_journal.journal_number.split('-')[-1])
                     except (ValueError, IndexError):
-                        last_num = 0
-                    journal.journal_number = f'JV-{last_num + 1:05d}'
-                else:
-                    journal.journal_number = 'JV-00001'
+                        pass
+                journal.journal_number = f'JV-{last_num + 1:05d}'
 
-            # Set created_by if user is authenticated
-            if request.user.is_authenticated:
-                journal.created_by = request.user
+            journal.created_by = request.user
 
+            # 2. Process Lines in memory to check balance before saving
+            instances = formset.save(commit=False)
+
+            # Calculate totals using the correct field names from your models.py
+            total_debit = sum(
+                line.debit_amount for line in instances if line.debit_amount)
+            total_credit = sum(
+                line.credit_amount for line in instances if line.credit_amount)
+
+            # 3. Validation: Check if balanced
+            if total_debit != total_credit:
+                messages.error(
+                    request,
+                    f'Journal is not balanced! Debits: ₱{total_debit:,.2f}, Credits: ₱{total_credit:,.2f}'
+                )
+                return render(request, 'ledger/journal_form.html', {
+                    'form': form, 'formset': formset, 'title': 'Create Journal Entry'
+                })
+
+            # 4. Save everything now that we know it's valid
             journal.save()
 
-            # Create lines
-            formset.instance = journal
-            lines = formset.save()
+            for i, line in enumerate(instances):
+                line.journal = journal
+                line.line_number = i + 1  # Ensures line_number is set
+                line.created_by = request.user  # Fixes the IntegrityError
+                line.save()
 
-            # Validate double-entry
-            if not journal.is_balanced():
-                messages.error(
-                    request, f'Journal is not balanced! Debits: ₱{journal.total_debits()}, Credits: ₱{journal.total_credits()}')
-                journal.delete()
-                return redirect('journal_add')
+            # Handle formset deletions if any
+            for obj in formset.deleted_objects:
+                obj.delete()
 
             messages.success(
                 request, f'Journal {journal.journal_number} created successfully!')
@@ -257,15 +272,14 @@ def journal_add(request):
             initial={'transaction_date': timezone.now().date()})
         formset = JournalLineFormSet()
 
-    context = {
+    return render(request, 'ledger/journal_form.html', {
         'form': form,
         'formset': formset,
         'title': 'Create Journal Entry',
-    }
-    return render(request, 'ledger/journal_form.html', context)
+    })
 
 
-@login_required
+@login_required(login_url='login')
 @transaction.atomic
 def journal_edit(request, pk):
     """Edit draft journal entry"""
@@ -306,7 +320,7 @@ def journal_edit(request, pk):
     return render(request, 'ledger/journal_form.html', context)
 
 
-@login_required
+@login_required(login_url='login')
 def journal_post(request, pk):
     """Post a draft journal (finalize it)"""
     journal = get_object_or_404(JournalHeader, pk=pk)
@@ -333,7 +347,7 @@ def journal_post(request, pk):
     return render(request, 'ledger/journal_confirm_post.html', context)
 
 
-@login_required
+@login_required(login_url='login')
 def journal_void(request, pk):
     """Void a posted journal"""
     journal = get_object_or_404(JournalHeader, pk=pk)
@@ -354,7 +368,7 @@ def journal_void(request, pk):
     return render(request, 'ledger/journal_confirm_void.html', context)
 
 
-@login_required
+@login_required(login_url='login')
 # ==================== FINANCIAL REPORTS ====================
 def report_trial_balance(request):
     """Trial Balance Report"""
@@ -417,7 +431,7 @@ def report_trial_balance(request):
     return render(request, 'ledger/report_trial_balance.html', context)
 
 
-@login_required
+@login_required(login_url='login')
 def report_income_statement(request):
     """Income Statement (Profit & Loss)"""
     from django.db.models import Sum
@@ -500,7 +514,7 @@ def report_income_statement(request):
     return render(request, 'ledger/report_income_statement.html', context)
 
 
-@login_required
+@login_required(login_url='login')
 def report_balance_sheet(request):
     """Balance Sheet Report"""
     from django.db.models import Sum
@@ -619,7 +633,7 @@ def report_balance_sheet(request):
     return render(request, 'ledger/report_balance_sheet.html', context)
 
 
-@login_required
+@login_required(login_url='login')
 def report_general_ledger(request):
     """General Ledger Report by Account"""
     from django.db.models import Sum
@@ -683,7 +697,7 @@ def report_general_ledger(request):
     return render(request, 'ledger/report_general_ledger.html', context)
 
 
-@login_required
+@login_required(login_url='login')
 def report_chart_of_accounts(request):
     """Chart of Accounts Report with Balances"""
     from django.db.models import Sum
@@ -728,7 +742,7 @@ def report_chart_of_accounts(request):
 # --- TAX DASHBOARD & REPORTS ---
 
 
-@login_required
+@login_required(login_url='login')
 def taxes_dashboard(request):
     """Main tax reports hub."""
     return render(request, "ledger/taxes_dashboard.html")
@@ -759,7 +773,7 @@ def report_vat_summary(request):
     return render(request, "ledger/report_vat_summary.html", context)
 
 
-@login_required
+@login_required(login_url='login')
 def report_income_tax(request):
     """Income tax summary (BIR 1702)."""
     form = TaxReportFilterForm(request.GET or None)
@@ -787,7 +801,7 @@ def report_income_tax(request):
     return render(request, "ledger/report_income_tax.html", context)
 
 
-@login_required
+@login_required(login_url='login')
 def report_withholding_tax(request):
     """Withholding tax report (EWT and Final WHT)."""
     form = TaxReportFilterForm(request.GET or None)
@@ -808,7 +822,7 @@ def report_withholding_tax(request):
     return render(request, "ledger/report_withholding_tax.html", context)
 
 
-@login_required
+@login_required(login_url='login')
 def report_tax_liabilities(request):
     """Tax liabilities tracker."""
     form = TaxReportFilterForm(request.GET or None)

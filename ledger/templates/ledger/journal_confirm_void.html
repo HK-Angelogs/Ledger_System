@@ -31,7 +31,7 @@
                     
                     <form method="post" class="d-flex justify-content-between">
                         {% csrf_token %}
-                        <a href="/journals/{{ journal.pk }}/" class="btn btn-secondary">
+                        <a href="{% url 'journal_detail' journal.pk %}" class="btn btn-secondary">
                             <i class="bi bi-arrow-left"></i> Cancel
                         </a>
                         <button type="submit" class="btn btn-warning">
